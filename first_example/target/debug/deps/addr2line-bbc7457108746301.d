@@ -1,0 +1,11 @@
+/home/knecker/p6/testing/first_example/target/debug/deps/libaddr2line-bbc7457108746301.rmeta: /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lib.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/frame.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/function.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lazy.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/line.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lookup.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/unit.rs
+
+/home/knecker/p6/testing/first_example/target/debug/deps/addr2line-bbc7457108746301.d: /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lib.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/frame.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/function.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lazy.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/line.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lookup.rs /home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/unit.rs
+
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lib.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/frame.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/function.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lazy.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/line.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/lookup.rs:
+/home/knecker/.cargo/registry/src/index.crates.io-6f17d22bba15001f/addr2line-0.24.2/src/unit.rs:
