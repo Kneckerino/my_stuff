@@ -823,7 +823,7 @@
       "iri": "http://ontovibe.visualdataweb.org/imported#DeprecatedImportedClass",
       "baseIri": "http://ontovibe.visualdataweb.org/imported",
       "instances": 0,
-      "label": 0{
+      "label": {
         "IRI-based": "DeprecatedImportedClass"
       },
       "subClasses": [
