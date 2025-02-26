@@ -11,6 +11,7 @@ use grapher::simulator::SimulatorBuilder;
 
 //Petgraph
 use petgraph::graph;
+use petgraph::graph::Node;
 use petgraph::visit::NodeRef;
 use petgraph::Graph;
 use petgraph::dot::Dot;
@@ -20,14 +21,14 @@ use petgraph::graph::NodeIndex;
 use serde_json::{Result, Value};
 use serde::{Deserialize, Serialize};
 
-/* ||||||||||||||||||||||||||| */
-/* ||||||||  STRUCTS  |||||||| */
-/* ||||||||||||||||||||||||||| */
+// * ||||||||||||||||||||||||||| */
+// * ||||||||  STRUCTS  |||||||| */
+// * ||||||||||||||||||||||||||| */
 
 // & Main Struct (Head of the JSON)
 #[derive(Serialize, Deserialize, Debug)]
 struct OwlToWovlJSON {
-    _comment:               String,
+    _comment:               Option<String>,
     header:                 Header,
     namespace:              Option<Vec<String>>,
     metrics:                Option<Metrics>,
@@ -176,7 +177,7 @@ struct ILVT {
 fn main() {
 
     // * Read the JSON file */
-    let file = File::open("./src/sioc.json").unwrap();
+    let file = File::open("./src/foaf.json").unwrap();
     let reader = BufReader::new(file);
     let graph_struct: OwlToWovlJSON = serde_json::from_reader(reader).unwrap();
     
@@ -185,6 +186,21 @@ fn main() {
 
     //Hashmap is necessary to store the nodes references with their ids
     let mut hashmap   = HashMap::new();
+
+    for node in &graph_struct.class {
+        let node_id = node.id.clone();
+        let opt_index = hashmap.get(&node.id);
+        match opt_index {
+            Some(&x) => {},
+            None => {
+                if node.r#type != "owl:equivalentClass" &&
+                   node.r#type != "owl:Thing" { 
+                    // ^ 'Equivalent' and 'Thing' are not generated as nodes without knowing wether they are connected to something
+                    hashmap.insert(node_id, graph.add_node(node.id.clone()));
+                }
+            }
+        }
+    }
 
     for edge in &graph_struct.propertyAttribute {
         let domain_node_id = edge.domain.clone();
@@ -219,19 +235,7 @@ fn main() {
         graph.add_edge(dom_index, ran_index, ());
     }
 
-    for node in graph_struct.class {
-        let node_id = node.id.clone();
-        let opt_index = hashmap.get(&node.id);
-        match opt_index {
-            Some(&x) => {
-            },
-            None => {
-                hashmap.insert(node_id, graph.add_node(node.id.clone()));
-            }
-        }
-    }
-
-    for attr in graph_struct.classAttribute {
+    for attr in &graph_struct.classAttribute {
         let attr_id = attr.id.clone();
         let opt_index = hashmap.get(&attr.id);
 
@@ -241,9 +245,10 @@ fn main() {
                 dom_index = x;
             },
             None => {
-                println!("WARNING! Node does not exist, creating node: {:?}", attr.id);
-                dom_index = graph.add_node(attr.id.clone());
-                hashmap.insert(attr_id, dom_index);
+                continue;
+                //println!("WARNING! Node does not exist, creating node: {:?}", attr.id);
+                //dom_index = graph.add_node(attr.id.clone());
+                //hashmap.insert(attr_id, dom_index);
             }
         }
         make_edges(dom_index, attr.superClasses.clone(), &mut graph, &mut hashmap);
@@ -251,13 +256,14 @@ fn main() {
         make_edges(dom_index, attr.complement.clone(), &mut graph, &mut hashmap);
         make_edges(dom_index, attr.union.clone(), &mut graph, &mut hashmap);
         make_edges(dom_index, attr.intersection.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.equivalent.clone(), &mut graph, &mut hashmap);
         make_edges(dom_index, attr.disjointUnion.clone(), &mut graph, &mut hashmap);
+        // ? Used in a different implementation and should not construct edges
+        //make_edges(dom_index, attr.equivalent.clone(), &mut graph, &mut hashmap);
     }
     
     // ! Debugging stuff
-    //println!("{:?} == {:?}", graph_struct.propertyAttribute.len(), graph_struct.property.len());
-    //println!("{:?}", Dot::new(&graph));
+    println!("{:?}", Dot::new(&graph));
+    println!("Isolated nodes in the file are: {:?}", isolated_nodes(&graph_struct));
 
     // * Configure the simulator */
     let simulator = SimulatorBuilder::new()
@@ -296,3 +302,15 @@ fn make_edges (domain: NodeIndex, opt_vector: Option<Vec<String>>, graph: &mut G
     }
 }
 
+fn isolated_nodes (json_struct: &OwlToWovlJSON) -> Vec<String> {
+    let mut isolated_nodes = Vec::new();
+    'node_iter: for node in &json_struct.class {
+        for edge in &json_struct.propertyAttribute {
+            if edge.domain == node.id.clone() || edge.range == node.id.clone() {
+                continue 'node_iter;
+            }
+        }
+        isolated_nodes.push(node.id.clone());
+    }
+    return isolated_nodes;
+}
