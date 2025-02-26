@@ -42,13 +42,14 @@ struct OwlToWovlJSON {
 struct Header {
     languages:              Vec<String>,
     baseIris:               Option<Vec<String>>,
-    title:                  Label,
-    iri:                    String,
-    version:                String,
-    author:                 Vec<String>,
-    description:            Label,
+    title:                  Option<Label>,
+    iri:                    Option<String>,
+    version:                Option<String>,
+    author:                 Option<Vec<String>>,
+    description:            Option<Label>,
     labels:                 Option<Label>,
     other:                  Option<Other>,
+    prefixList:             Option<PrefixList>
 }
 #[derive(Serialize, Deserialize, Debug)]
 struct Metrics {
@@ -149,6 +150,18 @@ struct Individuals {
     description:            Option<Label>,
     labels:                 Option<Label>,
 }
+#[derive(Serialize, Deserialize, Debug)]
+struct PrefixList {
+    owl:                    Option<String>,
+    rdf:                    Option<String>,
+    wot:                    Option<String>,
+    xsd:                    Option<String>,
+    dc:                     Option<String>,
+    xml:                    Option<String>,
+    vs:                     Option<String>,
+    foaf:                   Option<String>,
+    rdfs:                   Option<String>,
+}
 
 // & Level 3
 #[derive(Serialize, Deserialize, Debug)]
@@ -163,7 +176,7 @@ struct ILVT {
 fn main() {
 
     // * Read the JSON file */
-    let file = File::open("./src/ontovibe.json").unwrap();
+    let file = File::open("./src/sioc.json").unwrap();
     let reader = BufReader::new(file);
     let graph_struct: OwlToWovlJSON = serde_json::from_reader(reader).unwrap();
     
@@ -243,9 +256,8 @@ fn main() {
     }
     
     // ! Debugging stuff
-    println!("{:?} == {:?}", graph_struct.propertyAttribute.len(), 
-    graph_struct.property.len());
-    println!("{:?}", Dot::new(&graph));
+    //println!("{:?} == {:?}", graph_struct.propertyAttribute.len(), graph_struct.property.len());
+    //println!("{:?}", Dot::new(&graph));
 
     // * Configure the simulator */
     let simulator = SimulatorBuilder::new()
