@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::Error;
 use std::collections::HashMap;
+use std::ops::Deref;
 
 //Grapher
 use grapher::renderer::Renderer;
@@ -185,18 +186,19 @@ fn main() {
     let mut graph = Graph::<String, ()>::new();
 
     //Hashmap is necessary to store the nodes references with their ids
-    let mut hashmap   = HashMap::new();
+    let mut node_hashmap: HashMap<String, NodeIndex>   = HashMap::new();
+    
 
     for node in &graph_struct.class {
         let node_id = node.id.clone();
-        let opt_index = hashmap.get(&node.id);
+        let opt_index = node_hashmap.get(&node.id);
         match opt_index {
             Some(&x) => {},
             None => {
                 if node.r#type != "owl:equivalentClass" &&
                    node.r#type != "owl:Thing" { 
                     // ^ 'Equivalent' and 'Thing' are not generated as nodes without knowing wether they are connected to something
-                    hashmap.insert(node_id, graph.add_node(node.id.clone()));
+                    node_hashmap.insert(node_id, graph.add_node(node.id.clone()));
                 }
             }
         }
@@ -211,25 +213,27 @@ fn main() {
         // * Check if the node already exists */
         // * If it does, get the index        */
         // * If it doesn't, create the node   */
-        let opt_dm_index = hashmap.get(&domain_node_id);
+        let opt_dm_index = node_hashmap.get(&domain_node_id);
         match opt_dm_index {
             Some(&x) => {
                 dom_index = x;
             },
             None => {
+                println!("WARNING! Node does not exist, creating node: {:?}", edge.domain.clone());
                 dom_index = graph.add_node(edge.domain.clone());
-                hashmap.insert(domain_node_id, dom_index);
+                node_hashmap.insert(domain_node_id, dom_index);
             }
         }
         
-        let opt_rn_index = hashmap.get(&edge.range);
+        let opt_rn_index = node_hashmap.get(&edge.range);
         match opt_rn_index {
             Some(&x) => {
                 ran_index = x;
             },
             None => {
+                println!("WARNING! Node does not exist, creating node: {:?}", edge.range.clone(), );
                 ran_index = graph.add_node(edge.range.clone());
-                hashmap.insert(range_node_id, ran_index);
+                node_hashmap.insert(range_node_id, ran_index);
             }
         }
         graph.add_edge(dom_index, ran_index, ());
@@ -237,7 +241,7 @@ fn main() {
 
     for attr in &graph_struct.classAttribute {
         let attr_id = attr.id.clone();
-        let opt_index = hashmap.get(&attr.id);
+        let opt_index = node_hashmap.get(&attr.id);
 
         let dom_index;
         match opt_index {
@@ -251,12 +255,12 @@ fn main() {
                 //hashmap.insert(attr_id, dom_index);
             }
         }
-        make_edges(dom_index, attr.superClasses.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.subClasses.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.complement.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.union.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.intersection.clone(), &mut graph, &mut hashmap);
-        make_edges(dom_index, attr.disjointUnion.clone(), &mut graph, &mut hashmap);
+        make_edges(dom_index, attr.superClasses.clone(), &mut graph, &mut node_hashmap);
+        make_edges(dom_index, attr.subClasses.clone(), &mut graph, &mut node_hashmap);
+        make_edges(dom_index, attr.complement.clone(), &mut graph, &mut node_hashmap);
+        make_edges(dom_index, attr.union.clone(), &mut graph, &mut node_hashmap);
+        make_edges(dom_index, attr.intersection.clone(), &mut graph, &mut node_hashmap);
+        make_edges(dom_index, attr.disjointUnion.clone(), &mut graph, &mut node_hashmap);
         // ? Used in a different implementation and should not construct edges
         //make_edges(dom_index, attr.equivalent.clone(), &mut graph, &mut hashmap);
     }
@@ -264,6 +268,7 @@ fn main() {
     // ! Debugging stuff
     println!("{:?}", Dot::new(&graph));
     println!("Isolated nodes in the file are: {:?}", isolated_nodes(&graph_struct));
+    println!("{:?}", node_hashmap.get("18").unwrap().index());
 
     // * Configure the simulator */
     let simulator = SimulatorBuilder::new()
